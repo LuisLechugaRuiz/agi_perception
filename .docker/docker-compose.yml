@@ -1,0 +1,8 @@
+version: '3.4'
+services:
+  agi_perception:
+    container_name: agi_perception
+    build:
+      context: ..
+      dockerfile: .docker/Dockerfile
+    working_dir: /app

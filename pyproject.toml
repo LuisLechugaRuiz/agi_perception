@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "agi-perception"
+version = "0.1.0"
+description = "General purpose perception"
+authors = ["luislechugaruiz <luislechugaruiz@gmail.com>"]
+readme = "README.md"
+packages = [{include = "agi_perception"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.0.1"
+numpy = "^1.24.3"
+nltk = "^3.8.1"
+fairscale = "^0.4.13"
+setuptools-rust = "^1.6.0"
+segment-anything = "^1.0"
+opencv-python = "^4.7.0.72"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
