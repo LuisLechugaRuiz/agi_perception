@@ -24,7 +24,7 @@ from groundingdino.util.utils import (
 from segment_anything import build_sam, SamPredictor
 
 # Recognize Anything - TODO: Install by pip.
-from recognize_anything.models.tag2text import ram
+from ram.models import ram_plus
 
 
 class SegmentateImage(object):
@@ -128,7 +128,7 @@ class SegmentateImage(object):
         return boxes_filt, torch.Tensor(scores), pred_phrases
 
     def load_ram_model(self, checkpoint):
-        model = ram(
+        model = ram_plus(
             pretrained=checkpoint,
             image_size=self.image_size,
             vit="swin_l",
@@ -155,19 +155,17 @@ class SegmentateImage(object):
         image_pil = Image.open(image_path).convert("RGB")
         # Visualize raw image
         filename, ext = os.path.splitext(image_filename)
-        raw_image_name = filename[: filename.rfind(".")] + "_raw" + ext
-        image_pil.save(os.path.join(self.output_dir, raw_image_name))
 
         # Get tags using ram model
         image_raw = image_pil.resize((self.image_size, self.image_size))
-        image_raw_tensor = self.normalize_image(image_pil=image_raw)
+        image_raw_tensor = self.normalize_image(image_pil=image_raw, resize=True)
         image_with_batch = image_raw_tensor.unsqueeze(0).to(self.device)
         english_tags, chinese_tags = self.get_tags(image_with_batch)
         tags = english_tags.replace(" |", ",")
         print("Image Tags: ", tags)
 
         # Get boxes using grounding model
-        image_tensor = self.normalize_image(image_pil=image_pil)
+        image_tensor = self.normalize_image(image_pil=image_pil, resize=False)
         boxes_filt, pred_phrases = self.get_boxes(
             image=image_tensor,
             image_pil=image_pil,
@@ -250,15 +248,23 @@ class SegmentateImage(object):
         )
         return masks
 
-    def normalize_image(self, image_pil):
+    def normalize_image(self, image_pil, resize):
         normalize = TS.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        transform = TS.Compose(
-            [
-                TS.Resize((self.image_size, self.image_size)),
-                TS.ToTensor(),
-                normalize,
-            ]
-        )
+        if resize:
+            transform = TS.Compose(
+                [
+                    TS.Resize((self.image_size, self.image_size)),
+                    TS.ToTensor(),
+                    normalize,
+                ]
+            )
+        else:
+            transform = TS.Compose(
+                [
+                    TS.ToTensor(),
+                    normalize,
+                ]
+            )
         image = transform(image_pil)
         return image
 
@@ -320,9 +326,11 @@ class SegmentateImage(object):
 def main():
     segmentate_image = SegmentateImage()
     # Test
-    masks, boxes, labels = segmentate_image.get_objects(
-        image_filename="moveit_test_2.png"
-    )
+    while True:
+        image_name = input("Name of the image:")
+        if not image_name:
+            image_name = "moveit_test_2.png"
+        masks, boxes, labels = segmentate_image.get_objects(image_filename=image_name)
 
 
 if __name__ == "__main__":

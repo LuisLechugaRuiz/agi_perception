@@ -5,4 +5,10 @@ services:
     build:
       context: ..
       dockerfile: .docker/Dockerfile
+    command: tail -f /dev/null
+    volumes:
+      - ../agi_perception:/app/agi_perception
+      - ../README.md:/app/README.md
+      - ../pyproject.toml:/app/pyproject.toml
+    # command: poetry run python /app/agi_perception/segmentate_image.py
     working_dir: /app

@@ -13,11 +13,12 @@ RUN echo "Poetry version:" && poetry --version
 
 # Install basic utils
 RUN apt-get update && \
-    apt-get install -y tmux vim
+    apt-get install -y tmux vim \
+    libgl1-mesa-dev
 
 # Copy data needed during build
-COPY agi_perception /app/agi_perception
-COPY README.md pyproject.toml /app/
+# COPY agi_perception /app/agi_perception
+# COPY README.md pyproject.toml /app/
 
 # Set the working directory for the app
 WORKDIR /app
@@ -31,4 +32,7 @@ RUN poetry install --no-interaction --no-ansi --with test
 # Clone and install GroundingDINO directly after other dependencies are installed
 RUN git clone https://github.com/IDEA-Research/GroundingDINO.git && \
     poetry run pip install ./GroundingDINO
+
+RUN git clone https://github.com/xinyu1205/recognize-anything.git && \
+    poetry run pip install ./recognize-anything
 
